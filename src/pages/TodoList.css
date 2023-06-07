@@ -1,0 +1,55 @@
+.container-custom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(to bottom, #5265ce, #2196f3);
+  color: #fff;
+}
+
+.todo-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  background-color: rgb(119, 116, 116,0.3);
+  width: 300px;
+  padding: 10px;
+  color: bisque;
+  border-radius: 10px;
+  transition: background-color 1 ease-in-out;
+}
+
+.animate {
+  animation: fade 1s;
+}
+
+.completed {
+  text-decoration: line-through;
+}
+
+@keyframes fade {
+  0% {
+    background-color: transparent;
+  }
+  100% {
+    background-color: rgba(29, 16, 218, 0.1);
+  }
+}
+
+.form-check-input
+{
+  margin: 0px 10px;
+}
+.form-check-input:checked
+{
+  background-color: #000000 !important;
+    border-color: #000000 !important;
+
+}

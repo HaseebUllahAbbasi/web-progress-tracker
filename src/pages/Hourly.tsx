@@ -4,6 +4,8 @@ import io from 'socket.io-client';
 import { useSelector } from "react-redux";
 import { LogoutUser } from '../store/UserActions';
 import { SERVER } from '../constant';
+import { useDispatch } from "react-redux"
+import { useNavigate } from 'react-router-dom';
 
 interface HourlyUpdate {
   _id: string;
@@ -14,6 +16,8 @@ interface HourlyUpdate {
 
 const HourlyUpdatesPage: React.FC = () => {
   const user = useSelector((state: StateType) => state?.user);
+  const dispatch = useDispatch()
+  const navigate = useNavigate();
 
   const [hourlyUpdates, setHourlyUpdates] = useState<HourlyUpdate[]>([]);
   const [desc, setDesc] = useState(['']);
@@ -21,12 +25,16 @@ const HourlyUpdatesPage: React.FC = () => {
 
   // Fetch the hourly updates from the server
   useEffect(() => {
+    if (!user?._id)
+      navigate('/')
     fetchHourlyUpdates();
 
-    // Subscribe to the "data-update" event
-    socket.on('data-update', (updatedData: HourlyUpdate) => {
-      setHourlyUpdates((prevUpdates) => [...prevUpdates, updatedData]);
+    socket.emit("hourly-user-update", { userId: user?._id })
+    socket.on('get-hourly-user', (updatedData: [HourlyUpdate]) => {
+      setHourlyUpdates(updatedData);
     });
+
+
 
     // Clean up the WebSocket connection
     return () => {
@@ -63,7 +71,7 @@ const HourlyUpdatesPage: React.FC = () => {
         userId: user?._id, timestamp: formattedTime, date: Date.now(),
       });
 
-      socket.emit('data-update', response.data);
+      socket.emit('data-update', { userId: user?._id });
     } catch (error) {
       console.error('Error adding hourly update:', error);
     }
@@ -77,49 +85,74 @@ const HourlyUpdatesPage: React.FC = () => {
 
   return (
     <div>
-      <h2>Hourly Updates</h2>
-      <div>
-        {
-          JSON.stringify(user)
-        }
-        <button onClick={() => {
-          LogoutUser()
+      <h2 className='text-center'>Hourly Updates</h2>
+      <div className='text-center'>
+
+        {/* <img src={`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${user?.username}`} alt="Profile" className='profile' /> */}
+        <span className='user-name'>
+          <span>
+            🧑
+          </span>
+          <span className='user-name-only'>
+            {user?.username}
+
+          </span>
+        </span>
+        <button className=' btn ' onClick={() => {
+          dispatch(LogoutUser())
+          navigate('/')
+
         }}>
-          Logout
+          <span className='logout' title='Logout'>
+            🚪
+          </span>
         </button>
 
       </div>
       <div>
-        <h4>Add New Update</h4>
-        {
-          desc.map((item, index) => <input key={index} className='form-control w-25' type='text' value={item} name={`${index}`} onChange={(e) => {
-            changeValue(e.target.value, index)
-          }} />)
-        }
-        <button className='btn btn-warning' onClick={() => setDesc([...desc, ''])}>
-          ➕
-        </button>
+        <h4 className='text-center'>Add New Update</h4>
+        <div className='text-center px-5 my-3'>
+          {
+            desc.map((item, index) => <span className='d-flex ' key={index}>
+              <span className='mx-3'>
+                {index + 1}.
+              </span>
+              <input key={index} className='form-control w-25' type='text' value={item} name={`${index}`} onChange={(e) => {
+                changeValue(e.target.value, index)
+              }} />
+              {
+                index + 1 === desc.length && <span className='mx-3 d-flex justify-content-around'>
+                  <button className='btn btn-warning' title='add new Item' onClick={() => setDesc([...desc, ''])}>
+                    ➕
+                  </button>
+                  <button className='btn btn-primary mx-1' onClick={handleAddUpdate}>Upload Hourly Data</button>
+
+                </span>
+
+              }
+            </span>)
+          }
+
+        </div>
 
 
 
 
 
       </div>
-      <div >
-        <button className='btn btn-primary' onClick={handleAddUpdate}>Add Update</button>
 
-      </div>
       <div>
-        <h4>View Updates</h4>
+        <h4 className='text-center'>View Updates</h4>
         <div className='d-flex flex-wrap'>
           {hourlyUpdates.map((item, index) => (
 
 
             <div key={index} style={{ padding: "10px", borderRadius: "10px", margin: "10px", background: "linear-gradient(135deg, rgb(226, 139, 254) 0%, rgb(75, 225, 236) 100%)" }}>
-              {/* use this when vertical */}
-              {/* <p style={{}}> {(index == 0) ? new Date(item.date).toDateString() : new Date(hourlyUpdates[index].date).toDateString() === new Date(hourlyUpdates[index - 1].date).toDateString() ? "" : new Date(item.date).toDateString()} -{item.timestamp}</p> */}
               <p>
                 {new Date(item.date).toDateString()}
+              </p>
+              <p className='text-center time'>
+                {item.timestamp}
               </p>
               <ul style={{ minHeight: "60px", width: "200px" }}>
                 {item?.description?.map((SubItem, subIndex) => (
@@ -130,8 +163,7 @@ const HourlyUpdatesPage: React.FC = () => {
                 <button className='btn btn-danger'
                   onClick={async () => {
                     const response = await axios.delete(SERVER + "/api/hourly/" + item._id)
-                    socket.emit('data-update', response.data);
-
+                    socket.emit('data-update', { userId: user?._id });
                   }}
                 >
                   Delete

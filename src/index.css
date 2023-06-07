@@ -13,3 +13,31 @@
   -webkit-text-size-adjust: 100%;
 }
 
+.time
+{
+  font-weight: 500;
+  font-size: large;
+}
+.profile
+{
+  width: 100px;
+  border-radius: 20px;
+  box-shadow:10px 10px 50px 10px rgba(90, 76, 79, 0.6);
+}
+.logout,.logout  *
+{
+  font-size: 50px; 
+}
+.user-name
+{
+  font-size: 30px;
+  font-weight: bolder;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(15, 228, 210, 0.7) 0%, rgba(22, 151, 236, 0.7) 100%);
+  text-transform: uppercase;
+  border-radius: 20px;
+}
+.user-name-only
+{
+
+}

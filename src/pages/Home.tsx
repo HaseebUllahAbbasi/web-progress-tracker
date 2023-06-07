@@ -12,8 +12,15 @@ const Home: React.FunctionComponent = () => {
           <Link to="/login">Login</Link>
         </li>
         <li>
-          <Link to="/hourly">Hourly Updates</Link>
+          <Link to="/to-do">To Do Task</Link>
         </li>
+        <li>
+          <Link to="/notes">Notes</Link>
+        </li>
+        <li>
+          <Link to="/calender">Calender</Link>
+        </li>
+
       </ul>
     </nav>
   </>
