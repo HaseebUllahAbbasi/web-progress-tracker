@@ -1,83 +1,62 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { SERVER } from '../constant';
 
-const SignUp: React.FunctionComponent = () => {
-  const [email, setEmail] = useState('');
+const Signup: React.FC = () => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
 
-  const handleSignUp = (e: { preventDefault: () => void }) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Perform signup logic here
-  };
 
-  const loginContainerStyle = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    background: 'linear-gradient(to top left, #00ff99, #ff66cc)',
-  };
+    try {
+      // Send signup request to the backend API
+      const response = await axios.post(`${SERVER}/api/users`, { username, password, email });
 
-  const formContainerStyle = {
-    backgroundColor: '#fff',
-    padding: '20px',
-    borderRadius: '5px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-  };
 
-  const inputStyle = {
-    width: '100%',
-    padding: '10px',
-    fontSize: '16px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-  };
-
-  const buttonStyle = {
-    display: 'block',
-    width: '100%',
-    padding: '10px',
-    fontSize: '16px',
-    borderRadius: '5px',
-    border: 'none',
-    backgroundColor: '#00416A',
-    color: '#fff',
-    cursor: 'pointer',
+      // Reset the form fields
+      setUsername('');
+      setPassword('');
+      setEmail('');
+    } catch (error) {
+      console.error('Error signing up:', error);
+      // Handle the error as needed
+    }
   };
 
   return (
-    <div style={loginContainerStyle}>
-      <div style={formContainerStyle}>
-        <h2>Login</h2>
-        <form onSubmit={handleSignUp}>
-          <div className="form-group">
-            <label htmlFor="signup-email">Email</label>
-            <input
-              type="email"
-              id="signup-email"
-              className="form-control"
-              style={inputStyle}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="signup-password">Password</label>
-            <input
-              type="password"
-              id="signup-password"
-              className="form-control"
-              style={inputStyle}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <button type="submit" className="btn btn-primary" style={buttonStyle}>
-            Sign Up
-          </button>
-        </form>
-      </div>
+    <div>
+      <h2>Sign Up</h2>
+      <form onSubmit={handleSignUp}>
+        <div>
+          <label>Username:</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Password:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Email:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <button type="submit">Sign Up</button>
+      </form>
     </div>
   );
 };
 
-export default SignUp;
+export default Signup;

@@ -1,12 +1,39 @@
+import axios from 'axios';
 import React, { useState } from 'react';
+import { useDispatch } from "react-redux"
+import { LoginUser } from '../store/UserActions';
+import { SERVER } from '../constant';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from "react-redux";
 
 const Login: React.FunctionComponent = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const userLogin = useSelector((state: StateType) => state);
 
-  const handleLogin = (e: { preventDefault: () => void; }) => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate();
+
+  const [username, setUserName] = useState('');
+  const [password, setPassword] = useState('');
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Perform login logic here
+
+    try {
+      // Send login request to the backend API
+      const response = await axios.post(SERVER + '/api/users/login', { username, password });
+      const user: SessionUser = (response.data)
+      // dispatch(LoginUser(user._id, user.email, user.username))
+      // Reset the form fields
+      console.log(user)
+      dispatch(LoginUser(user._id, user.email, user.username))
+
+      setPassword('');
+      setPassword('');
+      navigate('/hourly')
+
+    } catch (error) {
+      console.error('Error logging in:', error);
+      // Handle the error as needed
+    }
   };
 
   const loginContainerStyle = {
@@ -51,16 +78,17 @@ const Login: React.FunctionComponent = () => {
     <div style={loginContainerStyle}>
       <div style={formContainerStyle}>
         <h2>Login</h2>
+        {JSON.stringify(userLogin)}
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label htmlFor="login-email">Email</label>
             <input
-              type="email"
+              type="text"
               id="login-email"
               className="form-control"
               style={inputStyle}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUserName(e.target.value)}
             />
           </div>
           <div className="form-group">
