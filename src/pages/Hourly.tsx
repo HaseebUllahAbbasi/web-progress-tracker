@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { LogoutUser } from '../store/UserActions';
 import { SERVER } from '../constant';
 import { useDispatch } from "react-redux"
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface HourlyUpdate {
   _id: string;
@@ -15,6 +15,9 @@ interface HourlyUpdate {
 }
 
 const HourlyUpdatesPage: React.FC = () => {
+  const { date } = useParams();
+  const selectedDate = date ? date : new Date().toDateString();
+  const currentDate = new Date().toDateString();
   const user = useSelector((state: StateType) => state?.user);
   const dispatch = useDispatch()
   const navigate = useNavigate();
@@ -83,9 +86,13 @@ const HourlyUpdatesPage: React.FC = () => {
     setDesc(updatedDesc);
   }
 
+
   return (
     <div>
       <h2 className='text-center'>Hourly Updates</h2>
+      <h3 className='text-center'>
+        selectedDate : {selectedDate}
+      </h3>
       <div className='text-center'>
 
         {/* <img src={`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${user?.username}`} alt="Profile" className='profile' /> */}
@@ -109,40 +116,41 @@ const HourlyUpdatesPage: React.FC = () => {
         </button>
 
       </div>
-      <div>
-        <h4 className='text-center'>Add New Update</h4>
-        <div className='text-center px-5 my-3'>
-          {
-            desc.map((item, index) => <span className='d-flex ' key={index}>
-              <span className='mx-3'>
-                {index + 1}.
-              </span>
-              <input key={index} className='form-control w-25' type='text' value={item} name={`${index}`} onChange={(e) => {
-                changeValue(e.target.value, index)
-              }} />
-              {
-                index + 1 === desc.length && <span className='mx-3 d-flex justify-content-around'>
-                  <button className='btn btn-warning' title='add new Item' onClick={() => setDesc([...desc, ''])}>
-                    ➕
-                  </button>
-                  <button className='btn btn-primary mx-1' onClick={handleAddUpdate}>Upload Hourly Data</button>
-
+      {
+        currentDate === selectedDate &&
+        <div>
+          <h4 className='text-center'>Add New Update</h4>
+          <div className='text-center px-5 my-3'>
+            {
+              desc.map((item, index) => <span className='d-flex ' key={index}>
+                <span className='mx-3'>
+                  {index + 1}.
                 </span>
+                <input key={index} className='form-control w-25' type='text' value={item} name={`${index}`} onChange={(e) => {
+                  changeValue(e.target.value, index)
+                }} />
+                {
+                  index + 1 === desc.length && <span className='mx-3 d-flex justify-content-around'>
+                    <button className='btn btn-warning' title='add new Item' onClick={() => setDesc([...desc, ''])}>
+                      ➕
+                    </button>
+                    <button className='btn btn-primary mx-1' onClick={handleAddUpdate}>Upload Hourly Data</button>
 
-              }
-            </span>)
-          }
+                  </span>
+
+                }
+              </span>)
+            }
+
+
+          </div>
 
         </div>
-
-
-
-
-
-      </div>
+      }
 
       <div>
         <h4 className='text-center'>View Updates</h4>
+
         <div className='d-flex flex-wrap'>
           {hourlyUpdates.map((item, index) => (
 

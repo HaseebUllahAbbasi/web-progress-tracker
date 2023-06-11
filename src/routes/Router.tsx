@@ -6,6 +6,7 @@ import Home from '../pages/Home';
 import HourlyUpdatesPage from '../pages/Hourly';
 import DailyCalender from '../pages/DailyCalender';
 import ToDo from '../pages/Todo';
+import Notes from '../pages/Notes';
 
 
 const MainRoutes: React.FunctionComponent = () => {
@@ -20,7 +21,7 @@ const MainRoutes: React.FunctionComponent = () => {
         <Route path="/hourly/day" Component={HourlyUpdatesPage} />
         <Route path="/hourly" Component={HourlyUpdatesPage} />
         <Route path="/hourly/:date" Component={HourlyUpdatesPage} />
-        <Route path="/notes" Component={HourlyUpdatesPage} />
+        <Route path="/notes" Component={Notes} />
 
       </Routes>
     </Router>

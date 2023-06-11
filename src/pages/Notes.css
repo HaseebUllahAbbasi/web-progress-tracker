@@ -1,0 +1,88 @@
+/* Notes.css */
+.new-note-container {
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+}
+
+.note-container {
+  padding: 10px;
+  margin: 10px;
+  width: 200px;
+  height: 200px;
+  border: 1px solid #ccc;
+  transition: transform 0.3s ease-in-out;
+}
+
+.note-container:hover {
+  transform: scale(1.1);
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 5px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.px-5 {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.my-3 {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.mx-3 {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.justify-content-around {
+  justify-content: space-around;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.w-25 {
+  width: 25%;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: #fff;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.form-control {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+.form-control-color {
+  width: 50px;
+  height: 30px;
+  padding: 0;
+  border: none;
+}
+
+/* Additional custom styles can be added as needed */
