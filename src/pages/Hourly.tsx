@@ -17,7 +17,7 @@ interface HourlyUpdate {
 const HourlyUpdatesPage: React.FC = () => {
   const { date } = useParams();
   const selectedDate = date ? date : new Date().toDateString();
-  const currentDate = new Date().toDateString();
+  const today = new Date().toDateString();
   const user = useSelector((state: StateType) => state?.user);
   const dispatch = useDispatch()
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ const HourlyUpdatesPage: React.FC = () => {
 
       const response = await axios.post<HourlyUpdate>(SERVER + '/api/hourly', {
         description: desc,
-        userId: user?._id, timestamp: formattedTime, date: Date.now(),
+        userId: user?._id, timestamp: formattedTime, today,
       });
 
       socket.emit('data-update', { userId: user?._id });
@@ -117,7 +117,7 @@ const HourlyUpdatesPage: React.FC = () => {
 
       </div>
       {
-        currentDate === selectedDate &&
+        today === selectedDate &&
         <div>
           <h4 className='text-center'>Add New Update</h4>
           <div className='text-center px-5 my-3'>

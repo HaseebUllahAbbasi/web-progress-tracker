@@ -8,6 +8,7 @@
 .note-container {
   padding: 10px;
   margin: 10px;
+  border-radius: 10px;
   width: 200px;
   height: 200px;
   border: 1px solid #ccc;
@@ -15,7 +16,7 @@
 }
 
 .note-container:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 ul {

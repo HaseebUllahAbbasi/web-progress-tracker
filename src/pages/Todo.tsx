@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './TodoList.css';
+import { AiFillDelete } from 'react-icons/ai'
 
 interface TodoType {
   id: number;
@@ -60,6 +61,7 @@ const Todo: React.FC = () => {
     <div className="container-custom">
       <h2>Todo List</h2>
       <div className="todo-input">
+
         <input
           type="text"
           value={newTodo}
@@ -88,6 +90,11 @@ const Todo: React.FC = () => {
                 );
               }}
             >
+              <AiFillDelete style={{ fontSize: "20px" }} onClick={() => {
+                const newTodo = todos.filter(item => item.id !== todo.id)
+                setTodos(newTodo)
+              }} />
+
               <input
                 type="checkbox"
                 className='form-check-input'
@@ -106,7 +113,8 @@ const Todo: React.FC = () => {
             <div
 
               key={todo.id}
-              className={`todo-item ${todo.animate ? 'animate' : ''}`}
+              className={`${todo.animate ? 'animate shadow-lg my-1 todo-item' : 'shadow-lg my-1'}`}
+              style={{ borderRadius: "10px", padding: "10px" }}
               onAnimationEnd={() => {
                 setTodos((prevTodos) =>
                   prevTodos.map((t) => {
@@ -118,6 +126,12 @@ const Todo: React.FC = () => {
                 );
               }}
             >
+              <AiFillDelete style={{ fontSize: "20px" }} onClick={() => {
+                const newTodo = todos.filter(item => item.id !== todo.id)
+                setTodos(newTodo)
+              }} />
+
+
               <input
                 type="checkbox"
                 className='form-check-input'
@@ -125,6 +139,7 @@ const Todo: React.FC = () => {
                 onChange={() => handleToggleComplete(todo.id)}
               />
               <span className="completed">{todo.text}</span>
+
             </div>
           ))}
       </div>
