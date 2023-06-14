@@ -1,65 +1,104 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './TodoList.css';
 import { AiFillDelete } from 'react-icons/ai'
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import io from 'socket.io-client';
+import { SERVER } from '../constant';
+import axios from 'axios';
 
-interface TodoType {
-  id: number;
-  text: string;
-  completed: boolean;
-  animate: boolean;
+interface TodoUpdate {
+  _id: string;
+  user: string,
+  completed: boolean,
+  createdAt: Date,
+  title: string,
+  animate?: boolean;
 }
 
+
+
 const Todo: React.FC = () => {
-  const [todos, setTodos] = useState<TodoType[]>([]);
+  const navigate = useNavigate();
+  const user = useSelector((state: StateType) => state?.user);
+  const socket = io(SERVER);
+
+  // const [todoUpdates, setTodoUpdates] = useState<TodoUpdate[]>([]);
+
+  const [todoUpdates, setTodoUpdates] = useState<TodoUpdate[]>([]);
   const [newTodo, setNewTodo] = useState('');
 
+  useEffect(() => {
+    if (!user?._id)
+      navigate('/')
+    fetchTodoUpdates();
+
+    socket.emit("todo-user-update", { userId: user?._id })
+    socket.on('get-todo-user', (updatedData: [TodoUpdate]) => {
+      setTodoUpdates(updatedData);
+    });
+
+
+
+    // Clean up the WebSocket connection
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+  const handleAddUpdate = async () => {
+    try {
+      const response = await axios.post(SERVER + '/api/todo', {
+        title: newTodo, user: user?._id
+      });
+
+      socket.emit('todo-data-update', { userId: user?._id });
+    } catch (error) {
+      console.error('Error adding hourly update:', error);
+    }
+  }
+
+  const fetchTodoUpdates = async () => {
+    try {
+      if (user) {
+        const response = await axios.get<TodoUpdate[]>(SERVER + '/api/todo/' + user?._id);
+        setTodoUpdates(response.data);
+      }
+      else alert("User is not present")
+    } catch (error) {
+      console.error('Error fetching hourly updates:', error);
+    }
+  };
   const handleAddTodo = () => {
     if (newTodo.trim() !== '') {
-      const newTodoItem: TodoType = {
-        id: Date.now(),
-        text: newTodo,
-        completed: false,
-        animate: true,
-      };
-      setTodos([...todos, newTodoItem]);
+
+      // setTodos([...todos, newTodoItem]);
       setNewTodo('');
-      setTimeout(() => {
-        setTodos((prevTodos) =>
-          prevTodos.map((todo) => {
-            if (todo.id === newTodoItem.id) {
-              return { ...todo, animate: false };
-            }
-            return todo;
-          })
-        );
-      }, 500);
+      handleAddUpdate();
+
+
     }
   };
 
-  const handleToggleComplete = (id: number) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) => {
-        if (todo.id === id) {
-          return { ...todo, completed: !todo.completed, animate: true };
-        }
-        return todo;
-      })
-    );
-    setTimeout(() => {
-      setTodos((prevTodos) =>
-        prevTodos.map((todo) => {
-          if (todo.id === id) {
-            return { ...todo, animate: false };
-          }
-          return todo;
-        })
-      );
-    }, 500);
+  const handleToggleComplete = async (id: string, status: boolean) => {
+
+    const response = await axios.put(SERVER + '/api/todo/' + id, {
+      status: !status
+    });
+
+    socket.emit('todo-data-update', { userId: user?._id });
+
+
   };
 
   return (
     <div className="container-custom">
-      <h2>Todo List</h2>
+      <h2>Todo List
+      </h2>
+      <div>
+        {
+          JSON.stringify(user)
+        }
+      </div>
       <div className="todo-input">
 
         <input
@@ -73,62 +112,62 @@ const Todo: React.FC = () => {
       </div>
       <div>
         <h4>Incomplete Tasks</h4>
-        {todos
+        {todoUpdates
           .filter((todo) => !todo.completed)
           .map((todo) => (
             <div
-              key={todo.id}
+              key={todo._id}
               className={`todo-item ${todo.animate ? 'animate' : ''}`}
               onAnimationEnd={() => {
-                setTodos((prevTodos) =>
-                  prevTodos.map((t) => {
-                    if (t.id === todo.id) {
-                      return { ...t, animate: false };
-                    }
-                    return t;
-                  })
-                );
+                // setTodos((prevTodos) =>
+                //   prevTodos.map((t) => {
+                //     if (t.id === todo.id) {
+                //       return { ...t, animate: false };
+                //     }
+                //     return t;
+                //   })
+                // );
               }}
             >
               <AiFillDelete style={{ fontSize: "20px" }} onClick={() => {
-                const newTodo = todos.filter(item => item.id !== todo.id)
-                setTodos(newTodo)
+                const newTodo = todoUpdates.filter(item => item._id !== todo._id)
+                setTodoUpdates(newTodo)
               }} />
 
               <input
                 type="checkbox"
                 className='form-check-input'
                 checked={todo.completed}
-                onChange={() => handleToggleComplete(todo.id)}
+                onChange={() => handleToggleComplete(todo._id, todo.completed)}
               />
-              <span className={todo.completed ? 'completed' : ''}>{todo.text}</span>
+              <span className={todo.completed ? 'completed' : ''}>{todo.title}</span>
             </div>
           ))}
       </div>
       <div>
         <h4>Completed Tasks</h4>
-        {todos
+        {todoUpdates
           .filter((todo) => todo.completed)
           .map((todo) => (
             <div
 
-              key={todo.id}
+              key={todo._id}
               className={`${todo.animate ? 'animate shadow-lg my-1 todo-item' : 'shadow-lg my-1'}`}
               style={{ borderRadius: "10px", padding: "10px" }}
               onAnimationEnd={() => {
-                setTodos((prevTodos) =>
-                  prevTodos.map((t) => {
-                    if (t.id === todo.id) {
-                      return { ...t, animate: false };
-                    }
-                    return t;
-                  })
-                );
+                // setTodos((prevTodos) =>
+                //   prevTodos.map((t) => {
+                //     if (t.id === todo.id) {
+                //       return { ...t, animate: false };
+                //     }
+                //     return t;
+                //   })
+                // );
               }}
             >
               <AiFillDelete style={{ fontSize: "20px" }} onClick={() => {
-                const newTodo = todos.filter(item => item.id !== todo.id)
-                setTodos(newTodo)
+                const newTodo = todoUpdates.filter(item => item._id !== todo._id)
+                setTodoUpdates(newTodo)
               }} />
 
 
@@ -136,9 +175,9 @@ const Todo: React.FC = () => {
                 type="checkbox"
                 className='form-check-input'
                 checked={todo.completed}
-                onChange={() => handleToggleComplete(todo.id)}
+                onChange={() => handleToggleComplete(todo._id, todo.completed)}
               />
-              <span className="completed">{todo.text}</span>
+              <span className="completed">{todo.title}</span>
 
             </div>
           ))}
