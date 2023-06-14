@@ -1,11 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Notes.css"; // Import the CSS file for styling
 import { FaBeer, FaEdit } from 'react-icons/fa';
 import { AiFillDelete } from 'react-icons/ai'
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { SERVER } from "../constant";
+import { io } from "socket.io-client";
+import axios from "axios";
+import Swal from "sweetalert2";
 
+type NoteType = {
+  user: string;
+  heading: string;
+  items: string[];
+  color: string;
+  createdAt: Date;
+};
 
 const Notes: React.FunctionComponent = () => {
-  const [data, setData] = useState([
+  const [isEditing, setEdit] = useState<boolean>(false);
+  const [data, setData] = useState<NoteType[]>([
     {
       user: "user1",
       heading: "Todo List 1",
@@ -29,9 +43,43 @@ const Notes: React.FunctionComponent = () => {
     },
   ])
 
-  const [title, setTitle] = useState("");
+  const fetchTodoUpdates = async () => {
+    try {
+      if (user) {
+        const response = await axios.get<NoteType[]>(SERVER + '/api/notes/' + user?._id);
+        setData(response.data);
+      }
+      else alert("User is not present")
+    } catch (error) {
+      console.error('Error fetching hourly updates:', error);
+    }
+  };
 
-  const [desc, setDesc] = useState([""]);
+  // useEffect(() => {
+  //   if (!user?._id)
+  //     navigate('/')
+  //   fetchTodoUpdates();
+
+  //   socket.emit("notes-user-update", { userId: user?._id })
+  //   socket.on('get-notes-user', (updatedData: [NoteType]) => {
+  //     setData(updatedData);
+  //   });
+
+
+
+  //   // Clean up the WebSocket connection
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, []);
+
+  const [title, setTitle] = useState("");
+  const navigate = useNavigate();
+  const user = useSelector((state: StateType) => state?.user);
+  // const socket = io(SERVER);
+
+
+  const [desc, setDesc] = useState<string[]>([]);
   const [color, setColor] = useState<string>("#fffffa");
 
   function changeValue(value: string, index: number): void {
@@ -50,11 +98,40 @@ const Notes: React.FunctionComponent = () => {
     <>
       <h1 className="text-center">Notes App</h1>
       <div className="text-center">
-
         {!creatingNewNote && <button className="btn btn-warning" onClick={() => {
-          setCreating(true);
-          setDesc([''])
-          setColor('#fffffa')
+
+          if (title.length > 0 || desc.length > 0) {
+            Swal.fire({
+              title: 'Do you want to save the changes?',
+              showCancelButton: true,
+              confirmButtonText: "Don't Save",
+              confirmButtonColor: "red"
+            }).then((result) => {
+              /* Read more about isConfirmed, isDenied below */
+              if (result.isDismissed) {
+                return;
+              } else if (result.isConfirmed) {
+                setTitle('')
+                setDesc([''])
+                setColor("#ffff");
+                setCreating(true)
+                setEdit(false);
+
+
+                Swal.fire('Previous Changes are discarded', '', 'info')
+              }
+            })
+          }
+          else {
+
+            setCreating(true);
+            setTitle("")
+            setDesc([''])
+            setColor('#fffffa')
+            setEdit(false);
+          }
+
+
         }} >Create New Note</button>}
       </div>
 
@@ -73,9 +150,32 @@ const Notes: React.FunctionComponent = () => {
               onChange={(e) => setColor(e.target.value)}
             />
             <button className="btn btn-danger" onClick={() => {
-              setCreating(false);
-              setDesc([])
-              setColor('fffffa')
+              if (title.length > 0 || desc.length > 0) {
+                Swal.fire({
+                  title: 'Do you want to save the changes?',
+                  showCancelButton: true,
+                  confirmButtonText: "Don't Save",
+                  confirmButtonColor: "red"
+                }).then((result) => {
+                  /* Read more about isConfirmed, isDenied below */
+                  if (result.isDismissed) {
+                    return;
+                  } else if (result.isConfirmed) {
+                    setTitle('')
+                    setDesc([])
+                    setColor("#ffff");
+                    setCreating(false);
+                    Swal.fire('Previous Changes are discarded', '', 'info')
+                  }
+                })
+              }
+              else {
+
+                setCreating(false);
+                setTitle("")
+                setDesc([])
+                setColor('#fffffa')
+              }
             }} >Discard</button>
 
           </div>
@@ -116,7 +216,7 @@ const Notes: React.FunctionComponent = () => {
                       className="btn btn-primary mx-1"
                       onClick={handleAddUpdate}
                     >
-                      Save Note
+                      {isEditing === true ? "Edit" : "Save"}
                     </button>
                   </div>
                 ) : <div>
@@ -142,13 +242,43 @@ const Notes: React.FunctionComponent = () => {
           >
             <div className="d-flex">
               <FaEdit
+
                 title="Edit"
                 style={{ fontSize: "30px" }}
                 onClick={() => {
-                  setTitle(noteItem.heading)
-                  setDesc(noteItem.items)
-                  setColor(noteItem.color);
-                  setCreating(true)
+
+                  if (title.length > 0 || desc.length > 0) {
+                    Swal.fire({
+                      title: 'Do you want to save the changes?',
+                      showCancelButton: true,
+                      confirmButtonText: "Don't Save",
+                      confirmButtonColor: "red"
+                    }).then((result) => {
+                      /* Read more about isConfirmed, isDenied below */
+                      if (result.isDismissed) {
+                        return;
+                      } else if (result.isConfirmed) {
+                        setTitle(noteItem.heading)
+                        setDesc(noteItem.items)
+                        setColor(noteItem.color);
+                        setCreating(true)
+                        setEdit(true);
+
+                        Swal.fire('Previous Changes are discarded', '', 'info')
+                      }
+                    })
+                  }
+                  else {
+
+                    setTitle(noteItem.heading)
+                    setDesc(noteItem.items)
+                    setColor(noteItem.color);
+                    setCreating(true)
+                    setEdit(true);
+
+
+                  }
+
 
                 }}
               />

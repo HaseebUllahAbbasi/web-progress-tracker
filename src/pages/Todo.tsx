@@ -68,6 +68,7 @@ const Todo: React.FC = () => {
       console.error('Error fetching hourly updates:', error);
     }
   };
+
   const handleAddTodo = () => {
     if (newTodo.trim() !== '') {
 

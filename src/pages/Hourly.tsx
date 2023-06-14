@@ -15,6 +15,7 @@ interface HourlyUpdate {
 }
 
 const HourlyUpdatesPage: React.FC = () => {
+
   const { date } = useParams();
   const selectedDate = date ? date : new Date().toDateString();
   const today = new Date().toDateString();
