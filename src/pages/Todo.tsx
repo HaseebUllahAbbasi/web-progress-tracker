@@ -33,7 +33,7 @@ const Todo: React.FC = () => {
       navigate('/')
     fetchTodoUpdates();
 
-    socket.emit("todo-user-update", { userId: user?._id })
+    // socket.emit("todo-user-update", { userId: user?._id })
     socket.on('get-todo-user', (updatedData: [TodoUpdate]) => {
       setTodoUpdates(updatedData);
     });

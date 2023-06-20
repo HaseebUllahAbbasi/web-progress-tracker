@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Notes.css"; // Import the CSS file for styling
-import { FaBeer, FaEdit } from 'react-icons/fa';
+import { FaEdit } from 'react-icons/fa';
 import { AiFillDelete } from 'react-icons/ai'
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -10,6 +10,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 
 type NoteType = {
+  _id?: string;
   user: string;
   heading: string;
   items: string[];
@@ -18,29 +19,13 @@ type NoteType = {
 };
 
 const Notes: React.FunctionComponent = () => {
+  const navigate = useNavigate();
+  const user = useSelector((state: StateType) => state?.user);
+  const socket = io(SERVER);
+
   const [isEditing, setEdit] = useState<boolean>(false);
   const [data, setData] = useState<NoteType[]>([
-    {
-      user: "user1",
-      heading: "Todo List 1",
-      items: ["Item 1", "Item 2", "Item 3"],
-      color: "#fa00af",
-      createdAt: new Date(),
-    },
-    {
-      user: "user2",
-      heading: "Todo List 2",
-      items: ["Item A", "Item B", "Item C"],
-      color: '#ffaaaf',
-      createdAt: new Date(),
-    },
-    {
-      user: "user1",
-      heading: "Todo List 3",
-      items: ["Task 1", "Task 2", "Task 3"],
-      color: "#ffffaf",
-      createdAt: new Date(),
-    },
+
   ])
 
   const fetchTodoUpdates = async () => {
@@ -55,30 +40,23 @@ const Notes: React.FunctionComponent = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (!user?._id)
-  //     navigate('/')
-  //   fetchTodoUpdates();
+  useEffect(() => {
+    if (user?._id) fetchTodoUpdates();
+    // Clean up the WebSocket connection
+    socket.on("get-notes-user", (updatedData) => {
+      setData(updatedData);
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
-  //   socket.emit("notes-user-update", { userId: user?._id })
-  //   socket.on('get-notes-user', (updatedData: [NoteType]) => {
-  //     setData(updatedData);
-  //   });
 
-
-
-  //   // Clean up the WebSocket connection
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
 
   const [title, setTitle] = useState("");
-  const navigate = useNavigate();
-  const user = useSelector((state: StateType) => state?.user);
-  // const socket = io(SERVER);
 
 
+  const [selectedNote, setSelectedNote] = useState<string | undefined>("")
   const [desc, setDesc] = useState<string[]>([]);
   const [color, setColor] = useState<string>("#fffffa");
 
@@ -88,8 +66,35 @@ const Notes: React.FunctionComponent = () => {
     setDesc(updatedDesc);
   }
 
+
   const handleAddUpdate = async () => {
-    console.log("handle");
+    const result = await axios
+      .post(`${SERVER}/api/notes`, { userId: user?._id, heading: title, items: desc, color: color })
+      .then((res) => res.data);
+    if (result) {
+      setDesc([""])
+      setTitle("")
+      setCreating(false);
+
+      socket.emit("notes-user-update", { userId: user?._id });
+      console.log(result);
+      return result;
+    }
+  };
+
+  const handleUpdate = async (noteId?: string) => {
+    const result = await axios
+      .put(`${SERVER}/api/notes/${noteId}`, { userId: user?._id, heading: title, items: desc, color: color })
+      .then((res) => res.data);
+    if (result) {
+      setDesc([""])
+      setTitle("")
+      setCreating(false);
+      setSelectedNote("")
+      socket.emit("notes-user-update", { userId: user?._id });
+      console.log(result);
+      return result;
+    }
   };
 
   const [creatingNewNote, setCreating] = useState<boolean>(false);
@@ -214,7 +219,9 @@ const Notes: React.FunctionComponent = () => {
                     </button>
                     <button
                       className="btn btn-primary mx-1"
-                      onClick={handleAddUpdate}
+                      onClick={async () => {
+                        isEditing == true ? handleUpdate(selectedNote) : handleAddUpdate()
+                      }}
                     >
                       {isEditing === true ? "Edit" : "Save"}
                     </button>
@@ -244,7 +251,11 @@ const Notes: React.FunctionComponent = () => {
               <FaEdit
 
                 title="Edit"
-                style={{ fontSize: "30px" }}
+                style={{
+                  fontSize: "30px",
+                  color: noteItem.color,
+                  filter: "invert(1)",
+                }}
                 onClick={() => {
 
                   if (title.length > 0 || desc.length > 0) {
@@ -263,7 +274,7 @@ const Notes: React.FunctionComponent = () => {
                         setColor(noteItem.color);
                         setCreating(true)
                         setEdit(true);
-
+                        setSelectedNote(noteItem._id)
                         Swal.fire('Previous Changes are discarded', '', 'info')
                       }
                     })
@@ -275,6 +286,8 @@ const Notes: React.FunctionComponent = () => {
                     setColor(noteItem.color);
                     setCreating(true)
                     setEdit(true);
+                    setSelectedNote(noteItem._id)
+
 
 
                   }
@@ -285,20 +298,50 @@ const Notes: React.FunctionComponent = () => {
               <AiFillDelete
                 title="Delete"
 
-                style={{ fontSize: "30px" }} onClick={() => {
-                  const newArray = [...data];
-                  newArray.splice(index, 1);
-                  setData([...newArray])
+                style={{
+                  fontSize: "30px",
+                  color: noteItem.color,
+                  filter: "invert(1)",
+
+                }} onClick={async () => {
+
+                  const response = await axios.delete(SERVER + '/api/notes/' + noteItem?._id);
+                  if (response)
+                    socket.emit("notes-user-update", { userId: user?._id });
 
                 }} />
 
             </div>
-            <div className="display-6 text-center my-1 mb-3" style={{ fontSize: "20px", fontWeight: "bolder" }}>
+            <div
+              className="display-6 text-center my-1 mb-3"
+              style={{
+                fontSize: "20px",
+                fontWeight: "bold",
+                color: noteItem.color,
+                filter: "invert(1)",
+                textAlign: "center",
+                marginTop: "1rem",
+                marginBottom: "0.75rem",
+              }}
+            >
               {noteItem.heading}
             </div>
-            <ul>
+
+            <ul >
               {noteItem.items.map((listItem: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | React.ReactPortal | null | undefined, subIndex: React.Key | null | undefined) => (
-                <li key={subIndex}>{listItem}</li>
+                <li
+                  key={subIndex}>
+
+                  <span
+                    style={{
+                      color: noteItem.color,
+                      filter: "invert(1)",
+                    }}
+                  >
+                    - &nbsp;&nbsp;&nbsp;
+                    {listItem}</span>
+
+                </li>
               ))}
             </ul>
           </div>

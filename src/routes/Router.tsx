@@ -7,21 +7,39 @@ import HourlyUpdatesPage from '../pages/Hourly';
 import DailyCalender from '../pages/DailyCalender';
 import ToDo from '../pages/Todo';
 import Notes from '../pages/Notes';
+import HeaderFooter from '../components/HeaderFooter';
 
 
 const MainRoutes: React.FunctionComponent = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" Component={Home} />
-        <Route path="/signup" Component={Signup} />
-        <Route path="/login" Component={Login} />
-        <Route path='/calender' Component={DailyCalender} />
-        <Route path='/to-do' Component={ToDo} />
+        <Route path="/" element={<HeaderFooter>
+          <Home />
+        </HeaderFooter>} />
+        <Route path="/signup" element={<HeaderFooter>
+          <Signup />
+        </HeaderFooter>} />
+        <Route path="/login" element={<HeaderFooter>
+          <Login />
+        </HeaderFooter>} />
+        <Route path='/calender' element={<HeaderFooter>
+          <DailyCalender />
+        </HeaderFooter>} />
+        <Route path='/to-do'
+          element={<HeaderFooter>
+            <ToDo />
+          </HeaderFooter>}
+        />
         <Route path="/hourly/day" Component={HourlyUpdatesPage} />
         <Route path="/hourly" Component={HourlyUpdatesPage} />
-        <Route path="/hourly/:date" Component={HourlyUpdatesPage} />
-        <Route path="/notes" Component={Notes} />
+        <Route path="/hourly/:date" element={<HeaderFooter>
+          <HourlyUpdatesPage />
+        </HeaderFooter>}
+        />
+        <Route path="/notes" element={<HeaderFooter>
+          <Notes />
+        </HeaderFooter>} />
 
       </Routes>
     </Router>

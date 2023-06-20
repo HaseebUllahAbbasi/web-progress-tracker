@@ -28,7 +28,7 @@ const Login: React.FunctionComponent = () => {
 
       setPassword('');
       setPassword('');
-      navigate('/hourly')
+      navigate('/')
 
     } catch (error) {
       console.error('Error logging in:', error);
