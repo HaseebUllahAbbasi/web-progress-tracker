@@ -8,7 +8,7 @@ import { SERVER } from "../constant";
 import { io } from "socket.io-client";
 import axios from "axios";
 import Swal from "sweetalert2";
-
+import './TodoList.css';
 type NoteType = {
   _id?: string;
   user: string;
@@ -100,7 +100,7 @@ const Notes: React.FunctionComponent = () => {
   const [creatingNewNote, setCreating] = useState<boolean>(false);
 
   return (
-    <>
+    <div className="container-custom">
       <h1 className="text-center">Notes App</h1>
       <div className="text-center">
         {!creatingNewNote && <button className="btn btn-warning" onClick={() => {
@@ -142,7 +142,7 @@ const Notes: React.FunctionComponent = () => {
 
       {creatingNewNote && (
         <div
-          className="new-note-container"
+          className="new-note-container shadow-lg"
           style={{ backgroundColor: color }}
         >
           <div className="d-flex">
@@ -347,7 +347,7 @@ const Notes: React.FunctionComponent = () => {
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 };
 

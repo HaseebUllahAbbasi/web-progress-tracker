@@ -6,11 +6,12 @@ import { LogoutUser } from '../store/UserActions';
 import { SERVER } from '../constant';
 import { useDispatch } from "react-redux"
 import { useNavigate, useParams } from 'react-router-dom';
+import './TodoList.css';
 
 interface HourlyUpdate {
   _id: string;
   timestamp: string;
-  date: string;
+  date: Date;
   description: string[];
 }
 
@@ -72,7 +73,7 @@ const HourlyUpdatesPage: React.FC = () => {
 
       const response = await axios.post<HourlyUpdate>(SERVER + '/api/hourly', {
         description: desc,
-        userId: user?._id, timestamp: formattedTime, today,
+        userId: user?._id, timestamp: formattedTime, date: new Date(),
       });
 
       socket.emit('data-update', { userId: user?._id });
@@ -89,15 +90,16 @@ const HourlyUpdatesPage: React.FC = () => {
 
 
   return (
-    <div>
-      <h2 className='text-center'>Hourly Updates</h2>
+    <div className="container-custom">
+
+      <h2 className='text-center display-3'>Hourly Updates</h2>
       <h3 className='text-center'>
-        selectedDate : {selectedDate}
+        selected Date : {selectedDate}
       </h3>
       <div className='text-center'>
 
         {/* <img src={`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${user?.username}`} alt="Profile" className='profile' /> */}
-        <span className='user-name'>
+        {/* <span className='user-name'>
           <span>
             🧑
           </span>
@@ -105,8 +107,8 @@ const HourlyUpdatesPage: React.FC = () => {
             {user?.username}
 
           </span>
-        </span>
-        <button className=' btn ' onClick={() => {
+        </span> */}
+        {/* <button className=' btn ' onClick={() => {
           dispatch(LogoutUser())
           navigate('/')
 
@@ -114,7 +116,7 @@ const HourlyUpdatesPage: React.FC = () => {
           <span className='logout' title='Logout'>
             🚪
           </span>
-        </button>
+        </button> */}
 
       </div>
       {
@@ -152,11 +154,11 @@ const HourlyUpdatesPage: React.FC = () => {
       <div>
         <h4 className='text-center'>View Updates</h4>
 
-        <div className='d-flex flex-wrap'>
+        <div className='d-flex flex-wrap '>
           {hourlyUpdates.map((item, index) => (
 
 
-            <div key={index} style={{ padding: "10px", borderRadius: "10px", margin: "10px", background: "linear-gradient(135deg, rgb(226, 139, 254) 0%, rgb(75, 225, 236) 100%)" }}>
+            <div key={index} style={{ padding: "20px", borderRadius: "10px", margin: "10px", background: "linear-gradient(135deg, rgb(21, 21, 1,0.8) 0%, rgb(60,58,5) 100%)" }}>
               <p>
                 {new Date(item.date).toDateString()}
               </p>
@@ -169,7 +171,7 @@ const HourlyUpdatesPage: React.FC = () => {
                 ))}
               </ul>
               <div className='text-center'>
-                <button className='btn btn-danger'
+                <button className='btn btn-warning'
                   onClick={async () => {
                     const response = await axios.delete(SERVER + "/api/hourly/" + item._id)
                     socket.emit('data-update', { userId: user?._id });

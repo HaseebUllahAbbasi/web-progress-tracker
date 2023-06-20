@@ -41,7 +41,7 @@ const Login: React.FunctionComponent = () => {
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
-    background: 'linear-gradient(to top left, #00ff99, #ff66cc)',
+    background: 'linear-gradient(to top left, rgb(99,88, 153,0.9), rgb(255, 102, 204,0.6))'
   };
 
 
@@ -78,7 +78,6 @@ const Login: React.FunctionComponent = () => {
     <div style={loginContainerStyle}>
       <div style={formContainerStyle}>
         <h2>Login</h2>
-        {JSON.stringify(userLogin)}
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label htmlFor="login-email">Email</label>
@@ -102,7 +101,7 @@ const Login: React.FunctionComponent = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button type="submit" className="btn btn-primary" style={buttonStyle}>
+          <button type="submit" className="btn btn-primary my-1" style={buttonStyle}>
             Login
           </button>
         </form>

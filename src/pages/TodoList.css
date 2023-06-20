@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background: linear-gradient(to bottom, #5265ce, #2196f3);
+  background: linear-gradient(to bottom, #1c1c20, #4caefd);
   color: #fff;
 }
 
@@ -18,11 +18,11 @@
   display: flex;
   align-items: center;
   margin-bottom: 10px;
-  background-color: rgb(119, 116, 116,0.3);
+  background-color: rgba(0, 0, 0, 0.3);
   width: 300px;
   padding: 10px;
-  color: bisque;
-  border-radius: 10px;
+  color: rgb(255, 255, 255);
+  border-radius: 10px;  
   transition: background-color 1 ease-in-out;
 }
 
@@ -50,6 +50,6 @@
 .form-check-input:checked
 {
   background-color: #000000 !important;
-    border-color: #000000 !important;
+  border-color: #000000 !important;
 
 }

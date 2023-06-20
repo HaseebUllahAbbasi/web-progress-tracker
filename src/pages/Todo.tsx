@@ -96,9 +96,7 @@ const Todo: React.FC = () => {
       <h2>Todo List
       </h2>
       <div>
-        {
-          JSON.stringify(user)
-        }
+
       </div>
       <div className="todo-input">
 
@@ -118,17 +116,8 @@ const Todo: React.FC = () => {
           .map((todo) => (
             <div
               key={todo._id}
-              className={`todo-item ${todo.animate ? 'animate' : ''}`}
-              onAnimationEnd={() => {
-                // setTodos((prevTodos) =>
-                //   prevTodos.map((t) => {
-                //     if (t.id === todo.id) {
-                //       return { ...t, animate: false };
-                //     }
-                //     return t;
-                //   })
-                // );
-              }}
+              className={`todo-item my-1 ${todo.animate ? 'animate' : ''}`}
+
             >
               <AiFillDelete style={{ fontSize: "20px" }} onClick={() => {
                 const newTodo = todoUpdates.filter(item => item._id !== todo._id)
@@ -146,25 +135,16 @@ const Todo: React.FC = () => {
           ))}
       </div>
       <div>
-        <h4>Completed Tasks</h4>
+        <h4 className='text-center'>Completed Tasks</h4>
         {todoUpdates
           .filter((todo) => todo.completed)
           .map((todo) => (
             <div
 
               key={todo._id}
-              className={`${todo.animate ? 'animate shadow-lg my-1 todo-item' : 'shadow-lg my-1'}`}
-              style={{ borderRadius: "10px", padding: "10px" }}
-              onAnimationEnd={() => {
-                // setTodos((prevTodos) =>
-                //   prevTodos.map((t) => {
-                //     if (t.id === todo.id) {
-                //       return { ...t, animate: false };
-                //     }
-                //     return t;
-                //   })
-                // );
-              }}
+              className={`${todo.animate ? 'animate shadow-lg  my-2 todo-item' : 'shadow-lg my-2'}`}
+              style={{ borderRadius: "10px", padding: "10px", minWidth: "300px" }}
+
             >
               <AiFillDelete style={{ fontSize: "20px" }} onClick={() => {
                 const newTodo = todoUpdates.filter(item => item._id !== todo._id)
