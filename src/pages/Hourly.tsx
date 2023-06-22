@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from 'react-redux';
 import { LogoutUser } from '../store/UserActions';
 import { SERVER } from '../constant';
-import { useDispatch } from "react-redux"
 import { useNavigate, useParams } from 'react-router-dom';
 import './TodoList.css';
 
@@ -16,30 +15,26 @@ interface HourlyUpdate {
 }
 
 const HourlyUpdatesPage: React.FC = () => {
-
   const { date } = useParams();
-  const selectedDate = date ? date : new Date().toDateString();
+  const selectedDate = date || new Date().toDateString();
   const today = new Date().toDateString();
   const user = useSelector((state: StateType) => state?.user);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [hourlyUpdates, setHourlyUpdates] = useState<HourlyUpdate[]>([]);
-  const [desc, setDesc] = useState(['']);
+  const [desc, setDesc] = useState<string[]>(['']);
   const socket = io(SERVER);
 
   // Fetch the hourly updates from the server
   useEffect(() => {
-    if (!user?._id)
-      navigate('/')
+    if (!user?._id) navigate('/');
     fetchHourlyUpdates();
 
-    socket.emit("hourly-user-update", { userId: user?._id })
+    socket.emit('hourly-user-update', { userId: user?._id });
     socket.on('get-hourly-user', (updatedData: [HourlyUpdate]) => {
       setHourlyUpdates(updatedData);
     });
-
-
 
     // Clean up the WebSocket connection
     return () => {
@@ -50,10 +45,11 @@ const HourlyUpdatesPage: React.FC = () => {
   const fetchHourlyUpdates = async () => {
     try {
       if (user) {
-        const response = await axios.get<HourlyUpdate[]>(SERVER + '/api/hourly/user/' + user?._id);
+        const response = await axios.get<HourlyUpdate[]>(`${SERVER}/api/hourly/user/${user?._id}`);
         setHourlyUpdates(response.data);
+      } else {
+        alert('User is not present');
       }
-      else alert("User is not present")
     } catch (error) {
       console.error('Error fetching hourly updates:', error);
     }
@@ -62,18 +58,19 @@ const HourlyUpdatesPage: React.FC = () => {
   const handleAddUpdate = async () => {
     try {
       const currentDate = new Date();
-
       const hours = currentDate.getHours();
       const minutes = currentDate.getMinutes();
 
       // Format the time as "HH:mm"
-      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 
       console.log(formattedTime); // Output: "14:00"
 
-      const response = await axios.post<HourlyUpdate>(SERVER + '/api/hourly', {
+      const response = await axios.post<HourlyUpdate>(`${SERVER}/api/hourly`, {
         description: desc,
-        userId: user?._id, timestamp: formattedTime, date: new Date(),
+        userId: user?._id,
+        timestamp: formattedTime,
+        date: new Date(),
       });
 
       socket.emit('data-update', { userId: user?._id });
@@ -82,112 +79,89 @@ const HourlyUpdatesPage: React.FC = () => {
     }
   };
 
-  function changeValue(value: string, index: number): void {
+  const handleChangeValue = (value: string, index: number): void => {
     const updatedDesc = [...desc];
     updatedDesc[index] = value;
     setDesc(updatedDesc);
-  }
-
+  };
 
   return (
     <div className="container-custom">
-
-      <h2 className='text-center display-3'>Hourly Updates</h2>
-      <h3 className='text-center'>
-        selected Date : {selectedDate}
-      </h3>
-      <div className='text-center'>
-
-        {/* <img src={`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${user?.username}`} alt="Profile" className='profile' /> */}
-        {/* <span className='user-name'>
-          <span>
-            🧑
-          </span>
-          <span className='user-name-only'>
-            {user?.username}
-
-          </span>
-        </span> */}
-        {/* <button className=' btn ' onClick={() => {
-          dispatch(LogoutUser())
-          navigate('/')
-
-        }}>
-          <span className='logout' title='Logout'>
-            🚪
-          </span>
-        </button> */}
-
+      <h2 className="text-center display-3">Hourly Updates</h2>
+      <h3 className="text-center">Selected Date: {selectedDate}</h3>
+      <div className="text-center">
+        {/* Add user profile and logout button */}
       </div>
-      {
-        today === selectedDate &&
+      {today === selectedDate && (
         <div>
-          <h4 className='text-center'>Add New Update</h4>
-          <div className='text-center px-5 my-3'>
-            {
-              desc.map((item, index) => <span className='d-flex ' key={index}>
-                <span className='mx-3'>
-                  {index + 1}.
-                </span>
-                <input key={index} className='form-control w-25' type='text' value={item} name={`${index}`} onChange={(e) => {
-                  changeValue(e.target.value, index)
-                }} />
-                {
-                  index + 1 === desc.length && <span className='mx-3 d-flex justify-content-around'>
-                    <button className='btn btn-warning' title='add new Item' onClick={() => setDesc([...desc, ''])}>
+          <h4 className="text-center">Add New Update</h4>
+          <div className="text-center px-5 my-3">
+            <div className="d-flex flex-wrap">
+              {desc.map((item, index) => (
+                <div className="input-group mb-3 mx-2" key={index}>
+                  <span className="input-group-text">{index + 1}.</span>
+                  <input
+                    className="form-control"
+                    type="text"
+                    value={item}
+                    name={`${index}`}
+                    onChange={(e) => handleChangeValue(e.target.value, index)}
+                  />
+                  <span>
+                    <button
+                      className="btn btn-warning mx-1"
+                      title="Add new item"
+                      onClick={() => setDesc([...desc, ''])}
+                    >
                       ➕
                     </button>
-                    <button className='btn btn-primary mx-1' onClick={handleAddUpdate}>Upload Hourly Data</button>
 
                   </span>
-
-                }
-              </span>)
-            }
-
-
-          </div>
-
-        </div>
-      }
-
-      <div>
-        <h4 className='text-center'>View Updates</h4>
-
-        <div className='d-flex flex-wrap '>
-          {hourlyUpdates.map((item, index) => (
-
-
-            <div key={index} style={{ padding: "20px", borderRadius: "10px", margin: "10px", background: "linear-gradient(135deg, rgb(21, 21, 1,0.8) 0%, rgb(60,58,5) 100%)" }}>
-              <p>
-                {new Date(item.date).toDateString()}
-              </p>
-              <p className='text-center time'>
-                {item.timestamp}
-              </p>
-              <ul style={{ minHeight: "60px", width: "200px" }}>
-                {item?.description?.map((SubItem, subIndex) => (
-                  <li key={subIndex}>{SubItem}</li>
-                ))}
-              </ul>
-              <div className='text-center'>
-                <button className='btn btn-warning'
-                  onClick={async () => {
-                    const response = await axios.delete(SERVER + "/api/hourly/" + item._id)
-                    socket.emit('data-update', { userId: user?._id });
-                  }}
-                >
-                  Delete
+                </div>
+              ))}
+              <div className="d-flex flex-wrap mx-2">
+                <button className="btn btn-primary mb-2" onClick={handleAddUpdate}>
+                  Upload Hourly Data
                 </button>
-
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <div>
+        <h4 className="text-center">View Updates</h4>
+        <div className="d-flex flex-wrap justify-content-center">
+          {hourlyUpdates.map((item, index) => (
+            <div
+              key={index}
+              className="card m-2"
+              style={{ background: 'linear-gradient(135deg, rgba(21, 21, 1, 0.8) 0%, rgba(60, 58, 5) 100%)' }}
+            >
+              <div className="card-body">
+                <p>{new Date(item.date).toDateString()}</p>
+                <p className="text-center time">{item.timestamp}</p>
+                <ul className="list-unstyled">
+                  {item?.description?.map((subItem, subIndex) => (
+                    <li key={subIndex}>{subItem}</li>
+                  ))}
+                </ul>
+                <div className="text-center">
+                  <button
+                    className="btn btn-warning"
+                    onClick={async () => {
+                      const response = await axios.delete(`${SERVER}/api/hourly/${item._id}`);
+                      socket.emit('data-update', { userId: user?._id });
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))}
-
         </div>
-
       </div>
-    </div >
+    </div>
   );
 };
 

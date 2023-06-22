@@ -5,6 +5,7 @@ import { LoginUser } from '../store/UserActions';
 import { SERVER } from '../constant';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from "react-redux";
+import './TodoList.css';
 
 const Login: React.FunctionComponent = () => {
   const userLogin = useSelector((state: StateType) => state);
@@ -36,24 +37,6 @@ const Login: React.FunctionComponent = () => {
     }
   };
 
-  const loginContainerStyle = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    background: 'linear-gradient(to top left, rgb(99,88, 153,0.9), rgb(255, 102, 204,0.6))'
-  };
-
-
-
-
-  const formContainerStyle = {
-    backgroundColor: '#fff',
-    padding: '20px',
-    borderRadius: '5px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-  };
-
   const inputStyle = {
     width: '100%',
     padding: '10px',
@@ -75,9 +58,9 @@ const Login: React.FunctionComponent = () => {
   };
 
   return (
-    <div style={loginContainerStyle}>
-      <div style={formContainerStyle}>
-        <h2>Login</h2>
+    <div className="container-custom">
+      <div className='shadow-lg p-4' style={{ borderRadius: "20px" }}  >
+        <h2 className='display-6 text-center'>Login</h2>
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label htmlFor="login-email">Email</label>
@@ -101,7 +84,7 @@ const Login: React.FunctionComponent = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button type="submit" className="btn btn-primary my-1" style={buttonStyle}>
+          <button type="submit" className="btn btn-primary my-3" style={buttonStyle}>
             Login
           </button>
         </form>
